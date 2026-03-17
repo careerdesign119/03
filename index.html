@@ -1,87 +1,580 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>실시간 리더보드</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMU X ESG 1박2일캠프</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:            #06080f;
+  --surface:       rgba(255,255,255,0.033);
+  --border:        rgba(255,255,255,0.07);
+  --cyan:          #00d4ff;
+  --gold:          #f5c842;
+  --silver:        #a8b4c8;
+  --bronze:        #c87d3e;
+  --up:            #00ffb3;
+  --down:          #ff4d6d;
+  --muted:         #4a5568;
+  --text:          #dde3f0;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+html,body {
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+}
+
+/* ── BACKGROUND ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 90% 90%,  rgba(245,200,66,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 60%,  rgba(0,255,179,0.03) 0%, transparent 60%);
+}
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    radial-gradient(circle 1px at 12% 18%, rgba(255,255,255,0.55) 0%,transparent 100%),
+    radial-gradient(circle 1px at 35% 8%,  rgba(0,212,255,0.7)    0%,transparent 100%),
+    radial-gradient(circle 1px at 62% 22%, rgba(255,255,255,0.4)  0%,transparent 100%),
+    radial-gradient(circle 1px at 78% 55%, rgba(255,255,255,0.3)  0%,transparent 100%),
+    radial-gradient(circle 1px at 90% 12%, rgba(255,255,255,0.45) 0%,transparent 100%),
+    radial-gradient(circle 1px at 5%  75%, rgba(0,212,255,0.5)    0%,transparent 100%),
+    radial-gradient(circle 1px at 48% 88%, rgba(255,255,255,0.3)  0%,transparent 100%),
+    radial-gradient(circle 1px at 22% 45%, rgba(255,255,255,0.25) 0%,transparent 100%),
+    radial-gradient(circle 1px at 88% 78%, rgba(245,200,66,0.45)  0%,transparent 100%);
+}
+
+/* ── APP SHELL ── */
+#app {
+  position:relative; z-index:2;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center;
+  padding:2.5rem 1.2rem 3rem;
+}
+
+/* ── HEADER ── */
+.hdr {
+  text-align:center;
+  margin-bottom:2rem;
+}
+.hdr-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2.6rem,7vw,4.8rem);
+  letter-spacing:0.08em;
+  line-height:1;
+  background:linear-gradient(160deg,#fff 0%,var(--cyan) 45%,#93e8ff 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  filter:drop-shadow(0 0 24px rgba(0,212,255,0.35));
+}
+
+.hdr-live {
+  display:inline-flex; align-items:center; gap:6px;
+  margin-top:0.7rem;
+  font-family:'Space Mono',monospace;
+  font-size:0.58rem;
+  letter-spacing:0.22em;
+  color:var(--muted);
+}
+.dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--up);
+  box-shadow:0 0 6px var(--up);
+  animation:blink 1.2s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+
+/* ── BOARD ── */
+#board { width:100%; max-width:760px; }
+
+/* ── ROW ── */
+.row {
+  position:relative;
+  display:grid;
+  grid-template-columns:44px 1fr 80px;
+  align-items:center;
+  gap:0.9rem;
+  padding:0.65rem 1.1rem 0.65rem 0.9rem;
+  margin-bottom:0.45rem;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  overflow:hidden;
+  transition:
+    transform 0.6s cubic-bezier(0.22,1,0.36,1),
+    box-shadow 0.5s ease,
+    border-color 0.5s ease,
+    background 0.5s ease;
+  will-change:transform;
+  cursor:default;
+}
+.row:hover { transform:translateX(3px) !important; }
+
+/* rank tints */
+.row[data-rank="1"] {
+  border-color:rgba(245,200,66,0.28);
+  background:linear-gradient(100deg,rgba(245,200,66,0.07) 0%,transparent 55%),var(--surface);
+  box-shadow:0 0 24px rgba(245,200,66,0.09), inset 0 0 28px rgba(245,200,66,0.03);
+}
+.row[data-rank="2"] {
+  border-color:rgba(168,180,200,0.22);
+  background:linear-gradient(100deg,rgba(168,180,200,0.05) 0%,transparent 55%),var(--surface);
+  box-shadow:0 0 18px rgba(168,180,200,0.07);
+}
+.row[data-rank="3"] {
+  border-color:rgba(200,125,62,0.22);
+  background:linear-gradient(100deg,rgba(200,125,62,0.05) 0%,transparent 55%),var(--surface);
+  box-shadow:0 0 18px rgba(200,125,62,0.07);
+}
+
+/* rising flash */
+.row.flash { animation:flashAnim 0.85s ease forwards; }
+@keyframes flashAnim {
+  0%  { box-shadow:0 0 0 1.5px var(--up), 0 0 28px rgba(0,255,179,0.25); border-color:rgba(0,255,179,0.7); }
+  65% { box-shadow:0 0 0 1px rgba(0,255,179,0.2), 0 0 10px rgba(0,255,179,0.08); }
+  100%{ }
+}
+
+/* sheen */
+.row::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.025) 50%,transparent 60%);
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.row:hover::after { opacity:1; }
+
+/* sweep on flash */
+.row.flash::before {
+  content:''; position:absolute; top:0; width:40%; height:100%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,179,0.07),transparent);
+  animation:sweep 0.6s ease forwards;
+}
+@keyframes sweep { from{left:-40%} to{left:110%} }
+
+/* ── RANK CELL ── */
+.rank-cell {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; width:44px;
+}
+.rank-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.75rem; line-height:1;
+  transition:color 0.4s;
+}
+[data-rank="1"] .rank-num { color:var(--gold);   text-shadow:0 0 14px rgba(245,200,66,0.5); }
+[data-rank="2"] .rank-num { color:var(--silver); text-shadow:0 0 10px rgba(168,180,200,0.4); }
+[data-rank="3"] .rank-num { color:var(--bronze); text-shadow:0 0 10px rgba(200,125,62,0.4); }
+.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .rank-num { color:#5a6580; }
+
+.rank-delta {
+  font-family:'Space Mono',monospace;
+  font-size:0.5rem; letter-spacing:0.04em;
+  line-height:1;
+  transition:color 0.3s;
+}
+.rank-delta.up   { color:var(--up);   }
+.rank-delta.dn   { color:var(--down); }
+.rank-delta.eq   { color:var(--muted);}
+
+/* ── MID CELL ── */
+.mid { display:flex; flex-direction:column; gap:0.3rem; min-width:0; }
+
+.name-row { display:flex; align-items:baseline; gap:0.5rem; }
+.t-name {
+  font-weight:600; font-size:0.95rem; letter-spacing:0.02em; color:#e8edf8;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.t-title {
+  font-family:'Space Mono',monospace; font-size:0.52rem; letter-spacing:0.08em;
+  color:var(--muted); text-transform:uppercase;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  flex-shrink:0;
+}
+
+/* bar */
+.bar-track {
+  height:3px; background:rgba(255,255,255,0.05);
+  border-radius:99px; overflow:hidden;
+}
+.bar-fill {
+  height:100%; border-radius:99px;
+  transition:width 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+[data-rank="1"] .bar-fill { background:linear-gradient(90deg,#c87d00,var(--gold),#ffe97a); box-shadow:0 0 6px rgba(245,200,66,0.5); }
+[data-rank="2"] .bar-fill { background:linear-gradient(90deg,#607080,var(--silver)); }
+[data-rank="3"] .bar-fill { background:linear-gradient(90deg,#7a4020,var(--bronze)); }
+.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .bar-fill {
+  background:linear-gradient(90deg,rgba(0,180,220,0.4),rgba(0,212,255,0.7));
+}
+
+/* sub tags */
+.tags { display:flex; gap:0.5rem; align-items:center; margin-top:0.1rem; flex-wrap:wrap; }
+.tag {
+  font-family:'Space Mono',monospace; font-size:0.48rem; letter-spacing:0.07em;
+  color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.06);
+  padding:1px 5px; border-radius:3px;
+  transition:color 0.3s;
+}
+.tag b { color:rgba(255,255,255,0.55); font-weight:400; }
+
+/* ── SCORE CELL ── */
+.score-cell { text-align:right; flex-shrink:0; }
+.score-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2rem; line-height:1; letter-spacing:0.03em;
+  transition:color 0.4s;
+}
+[data-rank="1"] .score-val { color:var(--gold);   filter:drop-shadow(0 0 6px rgba(245,200,66,0.45)); }
+[data-rank="2"] .score-val { color:var(--silver); filter:drop-shadow(0 0 5px rgba(168,180,200,0.35)); }
+[data-rank="3"] .score-val { color:var(--bronze); filter:drop-shadow(0 0 5px rgba(200,125,62,0.35)); }
+.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .score-val { color:#8090b0; }
+
+.score-lbl {
+  font-family:'Space Mono',monospace; font-size:0.45rem; letter-spacing:0.2em;
+  color:var(--muted); text-transform:uppercase; margin-top:1px;
+}
+
+/* ── DIVIDER HEADER ── */
+.col-header {
+  display:grid; grid-template-columns:44px 1fr 80px;
+  gap:0.9rem; padding:0 1.1rem 0 0.9rem;
+  margin-bottom:0.55rem;
+}
+.col-header span {
+  font-family:'Space Mono',monospace; font-size:0.48rem;
+  letter-spacing:0.22em; color:var(--muted); text-transform:uppercase;
+}
+.col-header .c2 { }
+.col-header .c3 { text-align:right; }
+
+/* ── FOOTER ── */
+.stats {
+  display:flex; justify-content:center; gap:1.8rem; flex-wrap:wrap;
+  margin-top:1.6rem;
+}
+.stat {
+  font-family:'Space Mono',monospace; font-size:0.54rem; letter-spacing:0.14em;
+  color:var(--muted); border:1px solid var(--border);
+  padding:0.28rem 0.8rem; border-radius:4px;
+  background:rgba(255,255,255,0.02);
+}
+.stat em { color:var(--cyan); font-style:normal; }
+
+/* loading / empty */
+.notice {
+  width:100%;
+  max-width:760px;
+  margin-top:1rem;
+  text-align:center;
+  font-family:'Space Mono',monospace;
+  font-size:0.62rem;
+  letter-spacing:0.14em;
+  color:var(--muted);
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:500px){
+  .row { grid-template-columns:38px 1fr 64px; gap:0.6rem; padding:0.55rem 0.8rem; }
+  .tags { display:none; }
+  .score-val { font-size:1.6rem; }
+  .rank-num { font-size:1.5rem; }
+}
+</style>
 </head>
 <body>
-  <div class="bg-orb orb-1"></div>
-  <div class="bg-orb orb-2"></div>
-  <div class="bg-grid"></div>
+<div id="app">
+  <header class="hdr">
+    <div class="hdr-title">SMU X ESG 1박2일캠프</div>
+    <div class="hdr-live"><span class="dot"></span>LIVE</div>
+  </header>
 
-  <main class="app">
-    <header class="hero">
-      <div class="eyebrow">LIVE RANKING DASHBOARD</div>
-      <h1>실시간 순위 레이스</h1>
-      <p class="hero-sub">
-        Google Apps Script API 기반 · 2초 주기 자동 갱신
-      </p>
+  <div id="board">
+    <div class="col-header">
+      <span>RANK</span>
+      <span class="c2">TEAM</span>
+      <span class="c3">SCORE</span>
+    </div>
+  </div>
 
-      <div class="hero-stats glass">
-        <div class="stat-item">
-          <span class="stat-label">팀 수</span>
-          <strong id="teamCount">0</strong>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">최고 점수</span>
-          <strong id="topScore">0</strong>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">마지막 갱신</span>
-          <strong id="lastUpdated">-</strong>
-        </div>
-      </div>
-    </header>
+  <div class="stats">
+    <div class="stat">TEAMS <em id="s-teams">—</em></div>
+    <div class="stat">TOP <em id="s-top">—</em></div>
+    <div class="stat">TOTAL <em id="s-total">—</em></div>
+    <div class="stat">TICK <em id="s-tick">0</em></div>
+  </div>
 
-    <section class="board-wrap">
-      <div class="board-head glass">
-        <div>순위</div>
-        <div>팀 정보</div>
-        <div>점수</div>
-      </div>
+  <div id="notice" class="notice">LOADING DATA...</div>
+</div>
 
-      <div id="leaderboard" class="leaderboard"></div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwpVdjyHWAveoFhkPDyJCVip8F_qJYERkqfGd0VxfirISrYEfXeLJd64qHnt__eGQsarQ/exec";
 
-      <div id="emptyState" class="empty-state glass" style="display:none;">
-        표시할 데이터가 없습니다.
-      </div>
-    </section>
-  </main>
+let data = [];
+let prevRank = {};
+let dispScore = {};
+let rafs = {};
+let ticks = 0;
+let isFetching = false;
 
-  <template id="teamCardTemplate">
-    <article class="team-card glass">
-      <div class="rank-col">
-        <div class="rank-badge">1</div>
-        <div class="rank-delta"></div>
-      </div>
+function totalFromRow(row) {
+  const total = Number(row["총득표"] ?? 0);
+  if (Number.isFinite(total)) return total;
+  const esg = Number(row["ESG Impact"] ?? 0) || 0;
+  const inn = Number(row["Innovation"] ?? 0) || 0;
+  const imp = Number(row["Implementation"] ?? 0) || 0;
+  return esg + inn + imp;
+}
 
-      <div class="team-col">
-        <div class="team-main">
-          <h2 class="team-name"></h2>
-          <div class="team-title"></div>
-        </div>
+function normalizeRow(row, index) {
+  return {
+    id: String(row.id ?? row["팀명"] ?? `team-${index}`).trim(),
+    팀명: String(row["팀명"] ?? "").trim(),
+    타이틀: String(row["타이틀"] ?? "").trim(),
+    esg: Number(row["ESG Impact"] ?? 0) || 0,
+    inn: Number(row["Innovation"] ?? 0) || 0,
+    imp: Number(row["Implementation"] ?? 0) || 0,
+    pts: totalFromRow(row)
+  };
+}
 
-        <div class="meta-row">
-          <div class="field-pill">ESG <span class="field-esg">0</span></div>
-          <div class="field-pill">Innovation <span class="field-innovation">0</span></div>
-          <div class="field-pill">Implementation <span class="field-implementation">0</span></div>
-        </div>
+function extractArrayPayload(raw) {
+  if (Array.isArray(raw)) return raw;
+  if (Array.isArray(raw?.ranking)) return raw.ranking;
+  if (Array.isArray(raw?.data)) return raw.data;
+  if (Array.isArray(raw?.rows)) return raw.rows;
+  if (Array.isArray(raw?.values)) return raw.values;
+  return [];
+}
 
-        <div class="progress-track">
-          <div class="progress-bar"></div>
-          <div class="progress-glow"></div>
-        </div>
-      </div>
+function sorted(d) {
+  return [...d].sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    return a.팀명.localeCompare(b.팀명, "ko");
+  });
+}
 
-      <div class="score-col">
-        <div class="score-number">0</div>
-        <div class="score-label">총득표</div>
-      </div>
-    </article>
-  </template>
+/* ── count-up ── */
+function countUp(id, from, to, el) {
+  if (rafs[id]) cancelAnimationFrame(rafs[id]);
+  if (from === to) {
+    el.textContent = to;
+    dispScore[id] = to;
+    return;
+  }
 
-  <script src="script.js"></script>
+  const t0 = performance.now();
+  const dur = 650;
+
+  function step(now) {
+    const p = Math.min(1, (now - t0) / dur);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e);
+    if (p < 1) {
+      rafs[id] = requestAnimationFrame(step);
+    } else {
+      el.textContent = to;
+      dispScore[id] = to;
+    }
+  }
+
+  rafs[id] = requestAnimationFrame(step);
+}
+
+/* ── snapshot positions ── */
+function snap(container) {
+  const m = {};
+  container.querySelectorAll('.row[data-id]').forEach(el => {
+    m[el.dataset.id] = el.getBoundingClientRect().top;
+  });
+  return m;
+}
+
+/* ── render ── */
+function render(list) {
+  const container = document.getElementById('board');
+  const oldRows = container.querySelectorAll('.row[data-id]');
+  const max = list.length ? list[0].pts || 1 : 1;
+
+  const first = snap(container);
+
+  const existing = {};
+  oldRows.forEach(el => {
+    existing[el.dataset.id] = el;
+  });
+
+  list.forEach((team, i) => {
+    const rank = i + 1;
+    const id = team.id;
+    const pct = max > 0 ? (team.pts / max) * 100 : 0;
+    let row = existing[id];
+
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.id = id;
+      row.innerHTML = rowHTML(team, rank, pct);
+      container.appendChild(row);
+      dispScore[id] = team.pts;
+    } else {
+      const scoreEl = row.querySelector('.score-val');
+      const from = dispScore[id] ?? team.pts;
+      if (from !== team.pts) countUp(id, from, team.pts, scoreEl);
+      else scoreEl.textContent = team.pts;
+
+      row.querySelector('.bar-fill').style.width = pct + '%';
+      row.querySelector('.t-esg').textContent = team.esg;
+      row.querySelector('.t-inn').textContent = team.inn;
+      row.querySelector('.t-imp').textContent = team.imp;
+      row.querySelector('.t-name').textContent = team['팀명'];
+      row.querySelector('.t-title').textContent = team['타이틀'] || '-';
+    }
+
+    row.dataset.rank = rank;
+    row.querySelector('.rank-num').textContent = rank;
+
+    const prev = prevRank[id];
+    const deltaEl = row.querySelector('.rank-delta');
+    if (deltaEl) {
+      if (prev == null || prev === rank) {
+        deltaEl.className = 'rank-delta eq';
+        deltaEl.textContent = '—';
+      } else if (rank < prev) {
+        deltaEl.className = 'rank-delta up';
+        deltaEl.textContent = '▲' + (prev - rank);
+        row.classList.remove('flash');
+        void row.offsetWidth;
+        row.classList.add('flash');
+        setTimeout(() => row.classList.remove('flash'), 900);
+      } else {
+        deltaEl.className = 'rank-delta dn';
+        deltaEl.textContent = '▼' + (rank - prev);
+      }
+    }
+
+    container.appendChild(row);
+  });
+
+  Object.keys(existing).forEach(id => {
+    if (!list.some(team => team.id === id)) {
+      existing[id].remove();
+      delete prevRank[id];
+      delete dispScore[id];
+    }
+  });
+
+  const last = snap(container);
+  Object.keys(last).forEach(id => {
+    const el = container.querySelector(`.row[data-id="${id}"]`);
+    if (!el) return;
+    const dy = (first[id] ?? last[id]) - last[id];
+    if (Math.abs(dy) < 0.5) return;
+    el.style.transition = 'none';
+    el.style.transform = `translateY(${dy}px)`;
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform 0.6s cubic-bezier(0.22,1,0.36,1)';
+      el.style.transform = '';
+    });
+  });
+
+  list.forEach((t, i) => { prevRank[t.id] = i + 1; });
+}
+
+function rowHTML(t, rank, pct) {
+  return `
+  <div class="rank-cell">
+    <span class="rank-num">${rank}</span>
+    <span class="rank-delta eq">—</span>
+  </div>
+  <div class="mid">
+    <div class="name-row">
+      <span class="t-name">${t['팀명']}</span>
+      <span class="t-title">${t['타이틀'] || '-'}</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+    <div class="tags">
+      <span class="tag">ESG <b class="t-esg">${t.esg}</b></span>
+      <span class="tag">INNOV <b class="t-inn">${t.inn}</b></span>
+      <span class="tag">IMPL <b class="t-imp">${t.imp}</b></span>
+    </div>
+  </div>
+  <div class="score-cell">
+    <div class="score-val">${t.pts}</div>
+    <div class="score-lbl">pts</div>
+  </div>`;
+}
+
+function updateStats(list) {
+  const tot = list.reduce((s, t) => s + t.pts, 0);
+  document.getElementById('s-teams').textContent = list.length;
+  document.getElementById('s-top').textContent = list[0] ? list[0].pts : 0;
+  document.getElementById('s-total').textContent = tot;
+  document.getElementById('s-tick').textContent = ++ticks;
+}
+
+async function fetchRanking() {
+  const res = await fetch(API_URL, {
+    method: 'GET',
+    cache: 'no-store'
+  });
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+
+  const raw = await res.json();
+  console.log('API 응답:', raw);
+
+  return extractArrayPayload(raw)
+    .map(normalizeRow)
+    .filter(row => row['팀명']);
+}
+
+async function tick() {
+  if (isFetching) return;
+  isFetching = true;
+
+  const notice = document.getElementById('notice');
+
+  try {
+    const fresh = await fetchRanking();
+    data = fresh;
+    const s = sorted(fresh);
+
+    if (!s.length) {
+      notice.textContent = 'NO DATA';
+      return;
+    }
+
+    render(s);
+    updateStats(s);
+    notice.textContent = 'LIVE DATA CONNECTED';
+  } catch (error) {
+    console.error(error);
+    notice.textContent = 'API LOAD FAILED';
+  } finally {
+    isFetching = false;
+  }
+}
+
+// boot
+tick();
+setInterval(tick, 2000);
+</script>
 </body>
 </html>
