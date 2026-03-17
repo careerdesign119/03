@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>실시간 리더보드</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-grid"></div>
+
+  <main class="app">
+    <header class="hero">
+      <div class="eyebrow">LIVE RANKING DASHBOARD</div>
+      <h1>실시간 순위 레이스</h1>
+      <p class="hero-sub">
+        Google Apps Script API 기반 · 2초 주기 자동 갱신
+      </p>
+
+      <div class="hero-stats glass">
+        <div class="stat-item">
+          <span class="stat-label">팀 수</span>
+          <strong id="teamCount">0</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">최고 점수</span>
+          <strong id="topScore">0</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">마지막 갱신</span>
+          <strong id="lastUpdated">-</strong>
+        </div>
+      </div>
+    </header>
+
+    <section class="board-wrap">
+      <div class="board-head glass">
+        <div>순위</div>
+        <div>팀 정보</div>
+        <div>점수</div>
+      </div>
+
+      <div id="leaderboard" class="leaderboard"></div>
+
+      <div id="emptyState" class="empty-state glass" style="display:none;">
+        표시할 데이터가 없습니다.
+      </div>
+    </section>
+  </main>
+
+  <template id="teamCardTemplate">
+    <article class="team-card glass">
+      <div class="rank-col">
+        <div class="rank-badge">1</div>
+        <div class="rank-delta"></div>
+      </div>
+
+      <div class="team-col">
+        <div class="team-main">
+          <h2 class="team-name"></h2>
+          <div class="team-title"></div>
+        </div>
+
+        <div class="meta-row">
+          <div class="field-pill">ESG <span class="field-esg">0</span></div>
+          <div class="field-pill">Innovation <span class="field-innovation">0</span></div>
+          <div class="field-pill">Implementation <span class="field-implementation">0</span></div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-bar"></div>
+          <div class="progress-glow"></div>
+        </div>
+      </div>
+
+      <div class="score-col">
+        <div class="score-number">0</div>
+        <div class="score-label">총득표</div>
+      </div>
+    </article>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
