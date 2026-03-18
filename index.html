@@ -8,17 +8,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :root {
-  --bg:            #06080f;
-  --surface:       rgba(255,255,255,0.033);
-  --border:        rgba(255,255,255,0.07);
-  --cyan:          #00d4ff;
-  --gold:          #f5c842;
-  --silver:        #a8b4c8;
-  --bronze:        #c87d3e;
-  --up:            #00ffb3;
-  --down:          #ff4d6d;
-  --muted:         #4a5568;
-  --text:          #dde3f0;
+  --bg:       #06080f;
+  --surface:  rgba(255,255,255,0.033);
+  --border:   rgba(255,255,255,0.07);
+  --gold:     #f5c842;
+  --silver:   #a8b4c8;
+  --bronze:   #c87d3e;
+  --up:       #00ffb3;
+  --down:     #ff4d6d;
+  --muted:    #4a5568;
+  --text:     #dde3f0;
+
+  /* per-column accent colors */
+  --esg-c:    #34d399;   /* green  */
+  --inn-c:    #818cf8;   /* purple */
+  --imp-c:    #fb923c;   /* orange */
 }
 
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
@@ -31,258 +35,234 @@ html,body {
   overflow-x:hidden;
 }
 
-/* ── BACKGROUND ── */
 body::before {
-  content:'';
-  position:fixed; inset:0; z-index:0; pointer-events:none;
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,0.07) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 90% 90%,  rgba(245,200,66,0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 50% at 10% 60%,  rgba(0,255,179,0.03) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 45% at 15%  50%,  rgba(52,211,153,0.05)  0%,transparent 70%),
+    radial-gradient(ellipse 70% 45% at 50%  -5%,  rgba(129,140,248,0.06) 0%,transparent 70%),
+    radial-gradient(ellipse 70% 45% at 85%  50%,  rgba(251,146,60,0.05)  0%,transparent 70%);
 }
 body::after {
-  content:'';
-  position:fixed; inset:0; z-index:0; pointer-events:none;
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
   background-image:
-    radial-gradient(circle 1px at 12% 18%, rgba(255,255,255,0.55) 0%,transparent 100%),
-    radial-gradient(circle 1px at 35% 8%,  rgba(0,212,255,0.7)    0%,transparent 100%),
-    radial-gradient(circle 1px at 62% 22%, rgba(255,255,255,0.4)  0%,transparent 100%),
-    radial-gradient(circle 1px at 78% 55%, rgba(255,255,255,0.3)  0%,transparent 100%),
-    radial-gradient(circle 1px at 90% 12%, rgba(255,255,255,0.45) 0%,transparent 100%),
-    radial-gradient(circle 1px at 5%  75%, rgba(0,212,255,0.5)    0%,transparent 100%),
-    radial-gradient(circle 1px at 48% 88%, rgba(255,255,255,0.3)  0%,transparent 100%),
-    radial-gradient(circle 1px at 22% 45%, rgba(255,255,255,0.25) 0%,transparent 100%),
-    radial-gradient(circle 1px at 88% 78%, rgba(245,200,66,0.45)  0%,transparent 100%);
+    radial-gradient(circle 1px at 8%  12%, rgba(255,255,255,0.5) 0%,transparent 100%),
+    radial-gradient(circle 1px at 30%  7%, rgba(129,140,248,0.6) 0%,transparent 100%),
+    radial-gradient(circle 1px at 58% 20%, rgba(255,255,255,0.4) 0%,transparent 100%),
+    radial-gradient(circle 1px at 75% 60%, rgba(255,255,255,0.3) 0%,transparent 100%),
+    radial-gradient(circle 1px at 92% 15%, rgba(52,211,153,0.5)  0%,transparent 100%),
+    radial-gradient(circle 1px at 5%  75%, rgba(251,146,60,0.45) 0%,transparent 100%),
+    radial-gradient(circle 1px at 45% 85%, rgba(255,255,255,0.3) 0%,transparent 100%),
+    radial-gradient(circle 1px at 88% 80%, rgba(245,200,66,0.4)  0%,transparent 100%);
 }
 
-/* ── APP SHELL ── */
+/* ── APP ── */
 #app {
   position:relative; z-index:2;
   min-height:100vh;
   display:flex; flex-direction:column; align-items:center;
-  padding:2.5rem 1.2rem 3rem;
+  padding:2.2rem 1rem 3rem;
 }
 
 /* ── HEADER ── */
-.hdr {
-  text-align:center;
-  margin-bottom:2rem;
-}
+.hdr { text-align:center; margin-bottom:2rem; }
 .hdr-title {
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(2.6rem,7vw,4.8rem);
-  letter-spacing:0.1em;
-  line-height:1;
-  background:linear-gradient(160deg,#fff 0%,var(--cyan) 45%,#93e8ff 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
-  filter:drop-shadow(0 0 24px rgba(0,212,255,0.35));
+  font-size:clamp(2.4rem,6vw,4.4rem);
+  letter-spacing:0.1em; line-height:1;
+  background:linear-gradient(160deg,#fff 0%,#a5b4fc 45%,#93e8ff 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 22px rgba(129,140,248,0.4));
 }
-
-/* live dot only */
 .hdr-live {
   display:inline-flex; align-items:center; gap:6px;
-  margin-top:0.55rem;
-  font-family:'Space Mono',monospace;
-  font-size:0.58rem;
-  letter-spacing:0.22em;
-  color:var(--muted);
+  margin-top:0.5rem;
+  font-family:'Space Mono',monospace; font-size:0.55rem; letter-spacing:0.22em; color:var(--muted);
 }
 .dot {
   width:6px; height:6px; border-radius:50%;
-  background:var(--up);
-  box-shadow:0 0 6px var(--up);
+  background:var(--up); box-shadow:0 0 6px var(--up);
   animation:blink 1.2s step-end infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
 
-/* ── BOARD ── */
-#board { width:100%; max-width:760px; }
+/* ── THREE-COLUMN GRID ── */
+.arena {
+  width:100%; max-width:1100px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1rem;
+}
+
+/* ── COLUMN ── */
+.col { display:flex; flex-direction:column; gap:0; }
+
+.col-head {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:0.7rem 0.6rem 0.65rem;
+  border-radius:6px 6px 0 0;
+  border:1px solid var(--border); border-bottom:none;
+  background:rgba(255,255,255,0.025);
+  backdrop-filter:blur(12px);
+  margin-bottom:0;
+  gap:0.2rem;
+}
+.col-icon { font-size:1.1rem; line-height:1; }
+.col-label {
+  font-family:'Bebas Neue',sans-serif; letter-spacing:0.12em;
+  font-size:clamp(0.85rem,1.5vw,1.05rem); line-height:1;
+}
+.col-sub {
+  font-family:'Space Mono',monospace; font-size:0.45rem; letter-spacing:0.18em;
+  color:var(--muted); text-transform:uppercase;
+}
+
+/* per-column accent */
+.col[data-cat="esg"]  .col-head { border-color:rgba(52,211,153,0.25);  background:rgba(52,211,153,0.05); }
+.col[data-cat="esg"]  .col-label { color:var(--esg-c); filter:drop-shadow(0 0 8px rgba(52,211,153,0.4)); }
+.col[data-cat="inn"]  .col-head { border-color:rgba(129,140,248,0.25); background:rgba(129,140,248,0.05); }
+.col[data-cat="inn"]  .col-label { color:var(--inn-c); filter:drop-shadow(0 0 8px rgba(129,140,248,0.4)); }
+.col[data-cat="imp"]  .col-head { border-color:rgba(251,146,60,0.25);  background:rgba(251,146,60,0.05); }
+.col[data-cat="imp"]  .col-label { color:var(--imp-c); filter:drop-shadow(0 0 8px rgba(251,146,60,0.4)); }
 
 /* ── ROW ── */
 .row {
   position:relative;
   display:grid;
-  grid-template-columns:44px 1fr 80px;
+  grid-template-columns:34px 1fr 36px;
   align-items:center;
-  gap:0.9rem;
-  padding:0.65rem 1.1rem 0.65rem 0.9rem;
-  margin-bottom:0.45rem;
-  border-radius:6px;
-  border:1px solid var(--border);
+  gap:0.55rem;
+  padding:0.55rem 0.7rem 0.55rem 0.6rem;
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
   background:var(--surface);
-  backdrop-filter:blur(20px) saturate(1.4);
-  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  backdrop-filter:blur(20px);
   overflow:hidden;
   transition:
-    transform 0.6s cubic-bezier(0.22,1,0.36,1),
-    box-shadow 0.5s ease,
-    border-color 0.5s ease,
-    background 0.5s ease;
+    transform 0.55s cubic-bezier(0.22,1,0.36,1),
+    box-shadow 0.4s ease,
+    border-color 0.4s ease,
+    background 0.4s ease;
   will-change:transform;
   cursor:default;
 }
-.row:hover { transform:translateX(3px) !important; }
+.row:last-child { border-radius:0 0 6px 6px; }
+.row:hover { transform:translateX(2px) !important; }
 
-/* rank tints */
+/* 1st row connects to header */
+.col-rows .row:first-child { border-top:none; }
+
+/* rank tints (gold/silver/bronze always same) */
 .row[data-rank="1"] {
-  border-color:rgba(245,200,66,0.28);
-  background:linear-gradient(100deg,rgba(245,200,66,0.07) 0%,transparent 55%),var(--surface);
-  box-shadow:0 0 24px rgba(245,200,66,0.09), inset 0 0 28px rgba(245,200,66,0.03);
+  border-left-color:rgba(245,200,66,0.35); border-right-color:rgba(245,200,66,0.35);
+  border-bottom-color:rgba(245,200,66,0.2);
+  background:linear-gradient(100deg,rgba(245,200,66,0.08) 0%,transparent 60%),var(--surface);
+  box-shadow:0 0 20px rgba(245,200,66,0.08), inset 0 0 20px rgba(245,200,66,0.03);
 }
 .row[data-rank="2"] {
-  border-color:rgba(168,180,200,0.22);
-  background:linear-gradient(100deg,rgba(168,180,200,0.05) 0%,transparent 55%),var(--surface);
-  box-shadow:0 0 18px rgba(168,180,200,0.07);
+  border-left-color:rgba(168,180,200,0.2);
+  background:linear-gradient(100deg,rgba(168,180,200,0.05) 0%,transparent 60%),var(--surface);
 }
 .row[data-rank="3"] {
-  border-color:rgba(200,125,62,0.22);
-  background:linear-gradient(100deg,rgba(200,125,62,0.05) 0%,transparent 55%),var(--surface);
-  box-shadow:0 0 18px rgba(200,125,62,0.07);
+  border-left-color:rgba(200,125,62,0.2);
+  background:linear-gradient(100deg,rgba(200,125,62,0.04) 0%,transparent 60%),var(--surface);
 }
 
-/* rising flash */
-.row.flash { animation:flashAnim 0.85s ease forwards; }
+/* flash on rise */
+.row.flash { animation:flashAnim 0.8s ease forwards; }
 @keyframes flashAnim {
-  0%  { box-shadow:0 0 0 1.5px var(--up), 0 0 28px rgba(0,255,179,0.25); border-color:rgba(0,255,179,0.7); }
-  65% { box-shadow:0 0 0 1px rgba(0,255,179,0.2), 0 0 10px rgba(0,255,179,0.08); }
+  0%  { box-shadow:0 0 0 1.5px var(--up), 0 0 22px rgba(0,255,179,0.2); }
+  70% { box-shadow:0 0 0 1px rgba(0,255,179,0.15); }
   100%{ }
 }
-
-/* sheen */
-.row::after {
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.025) 50%,transparent 60%);
-  opacity:0;
-  transition:opacity 0.3s;
-}
-.row:hover::after { opacity:1; }
-
-/* sweep on flash */
 .row.flash::before {
-  content:''; position:absolute; top:0; width:40%; height:100%;
+  content:''; position:absolute; top:0; width:35%; height:100%;
   background:linear-gradient(90deg,transparent,rgba(0,255,179,0.07),transparent);
-  animation:sweep 0.6s ease forwards;
+  animation:sweep 0.55s ease forwards;
 }
-@keyframes sweep { from{left:-40%} to{left:110%} }
+@keyframes sweep { from{left:-35%} to{left:110%} }
 
 /* ── RANK CELL ── */
 .rank-cell {
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:1px; width:44px;
+  gap:1px; flex-shrink:0;
 }
 .rank-num {
-  font-family:'Bebas Neue',sans-serif;
-  font-size:1.75rem; line-height:1;
-  transition:color 0.4s;
+  font-family:'Bebas Neue',sans-serif; font-size:1.5rem; line-height:1;
 }
-[data-rank="1"] .rank-num { color:var(--gold);   text-shadow:0 0 14px rgba(245,200,66,0.5); }
-[data-rank="2"] .rank-num { color:var(--silver); text-shadow:0 0 10px rgba(168,180,200,0.4); }
-[data-rank="3"] .rank-num { color:var(--bronze); text-shadow:0 0 10px rgba(200,125,62,0.4); }
-.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .rank-num { color:#5a6580; }
+[data-rank="1"] .rank-num { color:var(--gold);   text-shadow:0 0 12px rgba(245,200,66,0.55); }
+[data-rank="2"] .rank-num { color:var(--silver); text-shadow:0 0 8px  rgba(168,180,200,0.4); }
+[data-rank="3"] .rank-num { color:var(--bronze); text-shadow:0 0 8px  rgba(200,125,62,0.4); }
+.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .rank-num { color:#4a5568; }
 
 .rank-delta {
-  font-family:'Space Mono',monospace;
-  font-size:0.5rem; letter-spacing:0.04em;
-  line-height:1;
-  transition:color 0.3s;
+  font-family:'Space Mono',monospace; font-size:0.42rem; letter-spacing:0.04em; line-height:1;
 }
-.rank-delta.up   { color:var(--up);   }
-.rank-delta.dn   { color:var(--down); }
-.rank-delta.eq   { color:var(--muted);}
+.rank-delta.up { color:var(--up); }
+.rank-delta.dn { color:var(--down); }
+.rank-delta.eq { color:var(--muted); }
 
-/* ── MID CELL ── */
-.mid { display:flex; flex-direction:column; gap:0.3rem; min-width:0; }
-
-.name-row { display:flex; align-items:baseline; gap:0.5rem; }
+/* ── MID ── */
+.mid { display:flex; flex-direction:column; gap:0.25rem; min-width:0; overflow:hidden; }
 .t-name {
-  font-weight:600; font-size:0.95rem; letter-spacing:0.02em; color:#e8edf8;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-weight:600; font-size:clamp(0.72rem,1.2vw,0.88rem);
+  color:#e8edf8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  letter-spacing:0.01em;
 }
 .t-title {
-  font-family:'Space Mono',monospace; font-size:0.52rem; letter-spacing:0.08em;
+  font-family:'Space Mono',monospace; font-size:0.42rem; letter-spacing:0.06em;
   color:var(--muted); text-transform:uppercase;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  flex-shrink:0;
 }
-
-/* bar */
 .bar-track {
-  height:3px; background:rgba(255,255,255,0.05);
-  border-radius:99px; overflow:hidden;
+  height:2px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:hidden;
 }
 .bar-fill {
   height:100%; border-radius:99px;
-  transition:width 0.9s cubic-bezier(0.4,0,0.2,1);
-}
-[data-rank="1"] .bar-fill { background:linear-gradient(90deg,#c87d00,var(--gold),#ffe97a); box-shadow:0 0 6px rgba(245,200,66,0.5); }
-[data-rank="2"] .bar-fill { background:linear-gradient(90deg,#607080,var(--silver)); }
-[data-rank="3"] .bar-fill { background:linear-gradient(90deg,#7a4020,var(--bronze)); }
-.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .bar-fill {
-  background:linear-gradient(90deg,rgba(0,180,220,0.4),rgba(0,212,255,0.7));
+  transition:width 0.85s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* sub tags */
-.tags { display:flex; gap:0.5rem; align-items:center; margin-top:0.1rem; flex-wrap:wrap; }
-.tag {
-  font-family:'Space Mono',monospace; font-size:0.48rem; letter-spacing:0.07em;
-  color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.06);
-  padding:1px 5px; border-radius:3px;
-  transition:color 0.3s;
-}
-.tag b { color:rgba(255,255,255,0.55); font-weight:400; }
+/* bar colors per column */
+.col[data-cat="esg"]  [data-rank="1"] .bar-fill { background:linear-gradient(90deg,#059669,var(--esg-c)); box-shadow:0 0 5px rgba(52,211,153,0.5); }
+.col[data-cat="esg"]  .bar-fill { background:rgba(52,211,153,0.5); }
+.col[data-cat="inn"]  [data-rank="1"] .bar-fill { background:linear-gradient(90deg,#4f46e5,var(--inn-c)); box-shadow:0 0 5px rgba(129,140,248,0.5); }
+.col[data-cat="inn"]  .bar-fill { background:rgba(129,140,248,0.5); }
+.col[data-cat="imp"]  [data-rank="1"] .bar-fill { background:linear-gradient(90deg,#c2410c,var(--imp-c)); box-shadow:0 0 5px rgba(251,146,60,0.5); }
+.col[data-cat="imp"]  .bar-fill { background:rgba(251,146,60,0.5); }
 
 /* ── SCORE CELL ── */
 .score-cell { text-align:right; flex-shrink:0; }
 .score-val {
-  font-family:'Bebas Neue',sans-serif;
-  font-size:2rem; line-height:1; letter-spacing:0.03em;
-  transition:color 0.4s;
+  font-family:'Bebas Neue',sans-serif; font-size:1.6rem; line-height:1; letter-spacing:0.03em;
 }
-[data-rank="1"] .score-val { color:var(--gold);   filter:drop-shadow(0 0 6px rgba(245,200,66,0.45)); }
-[data-rank="2"] .score-val { color:var(--silver); filter:drop-shadow(0 0 5px rgba(168,180,200,0.35)); }
-[data-rank="3"] .score-val { color:var(--bronze); filter:drop-shadow(0 0 5px rgba(200,125,62,0.35)); }
-.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .score-val { color:#8090b0; }
-
+[data-rank="1"] .score-val { color:var(--gold);   filter:drop-shadow(0 0 5px rgba(245,200,66,0.5)); }
+[data-rank="2"] .score-val { color:var(--silver); filter:drop-shadow(0 0 4px rgba(168,180,200,0.35)); }
+[data-rank="3"] .score-val { color:var(--bronze); filter:drop-shadow(0 0 4px rgba(200,125,62,0.35)); }
+.row:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) .score-val { color:#4a5568; }
 .score-lbl {
-  font-family:'Space Mono',monospace; font-size:0.45rem; letter-spacing:0.2em;
-  color:var(--muted); text-transform:uppercase; margin-top:1px;
+  font-family:'Space Mono',monospace; font-size:0.4rem; letter-spacing:0.18em;
+  color:var(--muted); text-transform:uppercase;
 }
-
-/* ── DIVIDER HEADER ── */
-.col-header {
-  display:grid; grid-template-columns:44px 1fr 80px;
-  gap:0.9rem; padding:0 1.1rem 0 0.9rem;
-  margin-bottom:0.55rem;
-}
-.col-header span {
-  font-family:'Space Mono',monospace; font-size:0.48rem;
-  letter-spacing:0.22em; color:var(--muted); text-transform:uppercase;
-}
-.col-header .c2 { /* mid */ }
-.col-header .c3 { text-align:right; }
 
 /* ── FOOTER ── */
 .stats {
-  display:flex; justify-content:center; gap:1.8rem; flex-wrap:wrap;
-  margin-top:1.6rem;
+  display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap; margin-top:1.4rem;
 }
 .stat {
-  font-family:'Space Mono',monospace; font-size:0.54rem; letter-spacing:0.14em;
+  font-family:'Space Mono',monospace; font-size:0.52rem; letter-spacing:0.14em;
   color:var(--muted); border:1px solid var(--border);
-  padding:0.28rem 0.8rem; border-radius:4px;
-  background:rgba(255,255,255,0.02);
+  padding:0.25rem 0.75rem; border-radius:4px; background:rgba(255,255,255,0.02);
 }
-.stat em { color:var(--cyan); font-style:normal; }
+.stat em { color:#a5b4fc; font-style:normal; }
 
 /* ── RESPONSIVE ── */
-@media(max-width:500px){
-  .row { grid-template-columns:38px 1fr 64px; gap:0.6rem; padding:0.55rem 0.8rem; }
-  .tags { display:none; }
-  .score-val { font-size:1.6rem; }
-  .rank-num { font-size:1.5rem; }
+@media(max-width:640px){
+  .arena { grid-template-columns:1fr; gap:1.5rem; }
+  .col-head { border-radius:6px 6px 0 0; }
+  .row { grid-template-columns:30px 1fr 32px; }
+}
+@media(min-width:641px) and (max-width:900px){
+  .t-title { display:none; }
 }
 </style>
 </head>
@@ -293,41 +273,71 @@ body::after {
     <div class="hdr-live"><span class="dot"></span>LIVE</div>
   </header>
 
-  <div id="board">
-    <div class="col-header">
-      <span>RANK</span>
-      <span class="c2">TEAM</span>
-      <span class="c3">SCORE</span>
+  <div class="arena">
+    <!-- ESG Impact -->
+    <div class="col" data-cat="esg">
+      <div class="col-head">
+        <div class="col-icon">🌿</div>
+        <div class="col-label">ESG Impact</div>
+        <div class="col-sub">환경·사회·거버넌스</div>
+      </div>
+      <div class="col-rows" id="col-esg"></div>
+    </div>
+
+    <!-- Innovation -->
+    <div class="col" data-cat="inn">
+      <div class="col-head">
+        <div class="col-icon">💡</div>
+        <div class="col-label">Innovation</div>
+        <div class="col-sub">혁신성·창의성</div>
+      </div>
+      <div class="col-rows" id="col-inn"></div>
+    </div>
+
+    <!-- Implementation -->
+    <div class="col" data-cat="imp">
+      <div class="col-head">
+        <div class="col-icon">⚙️</div>
+        <div class="col-label">Implementation</div>
+        <div class="col-sub">구현력·실현가능성</div>
+      </div>
+      <div class="col-rows" id="col-imp"></div>
     </div>
   </div>
 
   <div class="stats">
     <div class="stat">TEAMS <em id="s-teams">—</em></div>
-    <div class="stat">TOP <em id="s-top">—</em></div>
-    <div class="stat">TOTAL <em id="s-total">—</em></div>
     <div class="stat">TICK <em id="s-tick">0</em></div>
   </div>
 </div>
 
 <script>
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CONFIG
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const API_URL = "https://script.google.com/macros/s/AKfycbwpVdjyHWAveoFhkPDyJCVip8F_qJYERkqfGd0VxfirISrYEfXeLJd64qHnt__eGQsarQ/exec";
 const POLL_MS = 2000;
 
-/* ━━ state ━━ */
-let prevRank  = {};  // teamName → previous rank number
-let dispScore = {};  // teamName → currently-displayed score
-let rafs      = {};  // teamName → rAF handle
-let ticks     = 0;
-let busy      = false;
+/* ━━ per-column state ━━ */
+const COLS = [
+  { key:'esg', field:'ESG Impact',     el:'col-esg' },
+  { key:'inn', field:'Innovation',     el:'col-inn' },
+  { key:'imp', field:'Implementation', el:'col-imp' },
+];
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// prevRank[colKey][teamId] → previous rank
+const prevRank  = { esg:{}, inn:{}, imp:{} };
+// dispScore[colKey][teamId] → currently shown number
+const dispScore = { esg:{}, inn:{}, imp:{} };
+const rafs      = { esg:{}, inn:{}, imp:{} };
+let ticks = 0;
+let busy  = false;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    API
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 async function apiFetch() {
-  const res = await fetch(`${API_URL}?action=init`, { method: 'GET' });
+  const res = await fetch(`${API_URL}?action=init`, { method:'GET' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = await res.json();
   if (json.error) throw new Error(json.error);
@@ -337,112 +347,105 @@ async function apiFetch() {
 
   return ranking
     .map(r => {
-      const name    = String(r['팀명']  ?? '').trim();
+      const name = String(r['팀명'] ?? '').trim();
       if (!name) return null;
       const teamRow = teams.find(t => String(t['팀명'] ?? '').trim() === name);
-      const esg = Number(r['ESG Impact']     ?? 0) || 0;
-      const inn = Number(r['Innovation']     ?? 0) || 0;
-      const imp = Number(r['Implementation'] ?? 0) || 0;
-      const pts = Number(r['총득표']          ?? 0) || 0;
       return {
         id:    name,
-        팀명:   name,
-        타이틀: String(teamRow?.['타이틀'] ?? r['타이틀'] ?? '').trim(),
-        esg, inn, imp, pts,
+        name,
+        title: String(teamRow?.['타이틀'] ?? r['타이틀'] ?? '').trim(),
+        esg:   Number(r['ESG Impact']     ?? 0) || 0,
+        inn:   Number(r['Innovation']     ?? 0) || 0,
+        imp:   Number(r['Implementation'] ?? 0) || 0,
       };
     })
     .filter(Boolean);
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    HELPERS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function byScore(a, b){ return b.pts - a.pts; }
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-function setDot(state){ // 'ok' | 'err' | 'busy'
+function setDot(state) {
   const d = document.querySelector('.dot');
   if (!d) return;
-  const map = { ok:'var(--up)', err:'var(--down)', busy:'#778' };
-  d.style.background = map[state] || map.ok;
-  d.style.boxShadow  = `0 0 6px ${map[state] || map.ok}`;
+  const c = { ok:'var(--up)', err:'var(--down)', busy:'#556' };
+  d.style.background = c[state] || c.ok;
+  d.style.boxShadow  = `0 0 6px ${c[state] || c.ok}`;
 }
 
-/* ━━ count-up animation ━━ */
-function countUp(id, from, to, el) {
-  if (rafs[id]) cancelAnimationFrame(rafs[id]);
+function countUp(colKey, id, from, to, el) {
+  const rafKey = colKey + '_' + id;
+  if (rafs[colKey][id]) cancelAnimationFrame(rafs[colKey][id]);
   if (from === to) { el.textContent = to; return; }
   const t0 = performance.now(), dur = 600;
   (function step(now) {
     const p = Math.min(1, (now - t0) / dur);
     const e = 1 - Math.pow(1 - p, 3);
     el.textContent = Math.round(from + (to - from) * e);
-    if (p < 1) rafs[id] = requestAnimationFrame(step);
-    else { el.textContent = to; dispScore[id] = to; }
+    if (p < 1) rafs[colKey][id] = requestAnimationFrame(step);
+    else { el.textContent = to; dispScore[colKey][id] = to; }
   })(t0);
 }
 
-/* ━━ FLIP snapshot ━━ */
-function snap() {
+function snapCol(container) {
   const m = {};
-  document.querySelectorAll('#board .row[data-id]').forEach(el => {
+  container.querySelectorAll('.row[data-id]').forEach(el => {
     m[el.dataset.id] = el.getBoundingClientRect().top;
   });
   return m;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   RENDER
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-function render(list) {
-  const board = document.getElementById('board');
-  const max   = list[0]?.pts || 1;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RENDER ONE COLUMN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderCol(colKey, fieldKey, containerId, teams) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-  /* FIRST snapshot */
-  const first = snap();
+  // sort by this column's score
+  const list = [...teams].sort((a, b) => b[colKey] - a[colKey]);
+  const max  = list[0]?.[colKey] || 1;
 
-  /* existing rows map */
+  const first = snapCol(container);
+
   const existing = {};
-  board.querySelectorAll('.row[data-id]').forEach(el => { existing[el.dataset.id] = el; });
+  container.querySelectorAll('.row[data-id]').forEach(el => { existing[el.dataset.id] = el; });
 
-  /* remove rows for teams no longer in data */
+  // remove gone teams
   Object.keys(existing).forEach(id => {
     if (!list.find(t => t.id === id)) existing[id].remove();
   });
 
-  /* upsert + re-order */
   list.forEach((team, i) => {
-    const rank = i + 1;
-    const id   = team.id;
-    const pct  = Math.max(2, (team.pts / max) * 100); // min 2% so bar is always visible
-    let row    = existing[id];
+    const rank  = i + 1;
+    const id    = team.id;
+    const score = team[colKey];
+    const pct   = Math.max(3, (score / max) * 100);
+    let row = existing[id];
 
     if (!row) {
-      /* ── NEW row ── */
       row = document.createElement('div');
       row.className  = 'row';
       row.dataset.id = id;
-      row.innerHTML  = rowHTML(team, rank, pct);
-      board.appendChild(row);
-      dispScore[id] = team.pts;
+      row.innerHTML  = rowHTML(team, rank, score, pct);
+      container.appendChild(row);
+      dispScore[colKey][id] = score;
     } else {
-      /* ── UPDATE existing ── */
       const scoreEl = row.querySelector('.score-val');
-      const from    = dispScore[id] ?? team.pts;
-      if (from !== team.pts) countUp(id, from, team.pts, scoreEl);
-      else { dispScore[id] = team.pts; }
-
+      const from    = dispScore[colKey][id] ?? score;
+      if (from !== score) countUp(colKey, id, from, score, scoreEl);
+      else dispScore[colKey][id] = score;
       row.querySelector('.bar-fill').style.width = pct + '%';
-      row.querySelector('.t-esg').textContent    = team.esg;
-      row.querySelector('.t-inn').textContent    = team.inn;
-      row.querySelector('.t-imp').textContent    = team.imp;
     }
 
-    /* always sync rank num + data-rank (CSS glow selector) */
+    // sync rank
     row.dataset.rank = rank;
     row.querySelector('.rank-num').textContent = rank;
 
-    /* delta arrow */
-    const prev    = prevRank[id];
+    // delta
+    const prev    = prevRank[colKey][id];
     const deltaEl = row.querySelector('.rank-delta');
     if (deltaEl) {
       if (prev == null || prev === rank) {
@@ -458,90 +461,67 @@ function render(list) {
       }
     }
 
-    board.appendChild(row); /* move to correct position */
+    container.appendChild(row);
   });
 
-  /* FLIP animate */
-  const last = snap();
+  // FLIP
+  const last = snapCol(container);
   Object.keys(last).forEach(id => {
-    const el = document.querySelector(`#board .row[data-id="${id}"]`);
+    const el = container.querySelector(`.row[data-id="${id}"]`);
     if (!el) return;
     const dy = (first[id] ?? last[id]) - last[id];
     if (Math.abs(dy) < 0.5) return;
     el.style.transition = 'none';
     el.style.transform  = `translateY(${dy}px)`;
     requestAnimationFrame(() => {
-      el.style.transition = 'transform 0.6s cubic-bezier(0.22,1,0.36,1)';
+      el.style.transition = 'transform 0.55s cubic-bezier(0.22,1,0.36,1)';
       el.style.transform  = '';
     });
   });
 
-  /* save ranks */
-  list.forEach((t, i) => { prevRank[t.id] = i + 1; });
+  list.forEach((t, i) => { prevRank[colKey][t.id] = i + 1; });
 }
 
-function rowHTML(t, rank, pct) {
-  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function rowHTML(team, rank, score, pct) {
   return `
   <div class="rank-cell">
     <span class="rank-num">${rank}</span>
     <span class="rank-delta eq">—</span>
   </div>
   <div class="mid">
-    <div class="name-row">
-      <span class="t-name">${esc(t['팀명'])}</span>
-      <span class="t-title">${esc(t['타이틀'])}</span>
-    </div>
+    <div class="t-name">${esc(team.name)}</div>
+    <div class="t-title">${esc(team.title)}</div>
     <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-    <div class="tags">
-      <span class="tag">ESG <b class="t-esg">${t.esg}</b></span>
-      <span class="tag">INNOV <b class="t-inn">${t.inn}</b></span>
-      <span class="tag">IMPL <b class="t-imp">${t.imp}</b></span>
-    </div>
   </div>
   <div class="score-cell">
-    <div class="score-val">${t.pts}</div>
+    <div class="score-val">${score}</div>
     <div class="score-lbl">pts</div>
   </div>`;
 }
 
-function updateStats(list) {
-  const tot = list.reduce((s, t) => s + t.pts, 0);
-  document.getElementById('s-teams').textContent = list.length;
-  document.getElementById('s-top').textContent   = list[0]?.pts ?? '—';
-  document.getElementById('s-total').textContent = tot;
-  document.getElementById('s-tick').textContent  = ++ticks;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   POLL LOOP
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   POLL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 async function tick() {
   if (busy) return;
   busy = true;
   setDot('busy');
   try {
-    const fresh = await apiFetch();
+    const teams = await apiFetch();
 
-    /* init prevRank for brand-new teams (enter at bottom) */
-    fresh.forEach(t => {
-      if (prevRank[t.id] == null) prevRank[t.id] = 9999;
+    // init prevRank for new teams
+    teams.forEach(t => {
+      COLS.forEach(c => {
+        if (prevRank[c.key][t.id] == null) prevRank[c.key][t.id] = 9999;
+      });
     });
 
-    const list = [...fresh].sort(byScore);
+    COLS.forEach(c => renderCol(c.key, c.field, c.el, teams));
 
-    if (list.length === 0) {
-      document.querySelectorAll('#board .row').forEach(r => r.remove());
-      ['s-teams','s-top','s-total'].forEach(id => {
-        document.getElementById(id).textContent = '—';
-      });
-      document.getElementById('s-tick').textContent = ++ticks;
-    } else {
-      render(list);
-      updateStats(list);
-    }
+    document.getElementById('s-teams').textContent = teams.length;
+    document.getElementById('s-tick').textContent  = ++ticks;
     setDot('ok');
-  } catch (e) {
+  } catch(e) {
     console.error('[leaderboard]', e);
     setDot('err');
   } finally {
