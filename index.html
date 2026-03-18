@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMU X ESG 1박2일캠프</title>
+<title>LIVE LEADERBOARD</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -71,7 +71,7 @@ body::after {
 .hdr-title {
   font-family:'Bebas Neue',sans-serif;
   font-size:clamp(2.6rem,7vw,4.8rem);
-  letter-spacing:0.08em;
+  letter-spacing:0.1em;
   line-height:1;
   background:linear-gradient(160deg,#fff 0%,var(--cyan) 45%,#93e8ff 100%);
   -webkit-background-clip:text;
@@ -80,9 +80,10 @@ body::after {
   filter:drop-shadow(0 0 24px rgba(0,212,255,0.35));
 }
 
+/* live dot only */
 .hdr-live {
   display:inline-flex; align-items:center; gap:6px;
-  margin-top:0.7rem;
+  margin-top:0.55rem;
   font-family:'Space Mono',monospace;
   font-size:0.58rem;
   letter-spacing:0.22em;
@@ -260,7 +261,7 @@ body::after {
   font-family:'Space Mono',monospace; font-size:0.48rem;
   letter-spacing:0.22em; color:var(--muted); text-transform:uppercase;
 }
-.col-header .c2 { }
+.col-header .c2 { /* mid */ }
 .col-header .c3 { text-align:right; }
 
 /* ── FOOTER ── */
@@ -276,18 +277,6 @@ body::after {
 }
 .stat em { color:var(--cyan); font-style:normal; }
 
-/* loading / empty */
-.notice {
-  width:100%;
-  max-width:760px;
-  margin-top:1rem;
-  text-align:center;
-  font-family:'Space Mono',monospace;
-  font-size:0.62rem;
-  letter-spacing:0.14em;
-  color:var(--muted);
-}
-
 /* ── RESPONSIVE ── */
 @media(max-width:500px){
   .row { grid-template-columns:38px 1fr 64px; gap:0.6rem; padding:0.55rem 0.8rem; }
@@ -300,7 +289,7 @@ body::after {
 <body>
 <div id="app">
   <header class="hdr">
-    <div class="hdr-title">SMU X ESG 1박2일캠프</div>
+    <div class="hdr-title">LEADERBOARD</div>
     <div class="hdr-live"><span class="dot"></span>LIVE</div>
   </header>
 
@@ -318,184 +307,181 @@ body::after {
     <div class="stat">TOTAL <em id="s-total">—</em></div>
     <div class="stat">TICK <em id="s-tick">0</em></div>
   </div>
-
-  <div id="notice" class="notice">LOADING DATA...</div>
 </div>
 
 <script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONFIG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const API_URL = "https://script.google.com/macros/s/AKfycbwpVdjyHWAveoFhkPDyJCVip8F_qJYERkqfGd0VxfirISrYEfXeLJd64qHnt__eGQsarQ/exec";
+const POLL_MS = 2000;
 
-let data = [];
-let prevRank = {};
-let dispScore = {};
-let rafs = {};
-let ticks = 0;
-let isFetching = false;
+/* ━━ state ━━ */
+let prevRank  = {};  // teamName → previous rank number
+let dispScore = {};  // teamName → currently-displayed score
+let rafs      = {};  // teamName → rAF handle
+let ticks     = 0;
+let busy      = false;
 
-function totalFromRow(row) {
-  const total = Number(row["총득표"] ?? 0);
-  if (Number.isFinite(total)) return total;
-  const esg = Number(row["ESG Impact"] ?? 0) || 0;
-  const inn = Number(row["Innovation"] ?? 0) || 0;
-  const imp = Number(row["Implementation"] ?? 0) || 0;
-  return esg + inn + imp;
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   API
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+async function apiFetch() {
+  const res = await fetch(`${API_URL}?action=init`, { method: 'GET' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+
+  const ranking = Array.isArray(json.ranking) ? json.ranking : [];
+  const teams   = Array.isArray(json.teams)   ? json.teams   : [];
+
+  return ranking
+    .map(r => {
+      const name    = String(r['팀명']  ?? '').trim();
+      if (!name) return null;
+      const teamRow = teams.find(t => String(t['팀명'] ?? '').trim() === name);
+      const esg = Number(r['ESG Impact']     ?? 0) || 0;
+      const inn = Number(r['Innovation']     ?? 0) || 0;
+      const imp = Number(r['Implementation'] ?? 0) || 0;
+      const pts = Number(r['총득표']          ?? 0) || 0;
+      return {
+        id:    name,
+        팀명:   name,
+        타이틀: String(teamRow?.['타이틀'] ?? r['타이틀'] ?? '').trim(),
+        esg, inn, imp, pts,
+      };
+    })
+    .filter(Boolean);
 }
 
-function normalizeRow(row, index) {
-  return {
-    id: String(row.id ?? row["팀명"] ?? `team-${index}`).trim(),
-    팀명: String(row["팀명"] ?? "").trim(),
-    타이틀: String(row["타이틀"] ?? "").trim(),
-    esg: Number(row["ESG Impact"] ?? 0) || 0,
-    inn: Number(row["Innovation"] ?? 0) || 0,
-    imp: Number(row["Implementation"] ?? 0) || 0,
-    pts: totalFromRow(row)
-  };
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function byScore(a, b){ return b.pts - a.pts; }
+
+function setDot(state){ // 'ok' | 'err' | 'busy'
+  const d = document.querySelector('.dot');
+  if (!d) return;
+  const map = { ok:'var(--up)', err:'var(--down)', busy:'#778' };
+  d.style.background = map[state] || map.ok;
+  d.style.boxShadow  = `0 0 6px ${map[state] || map.ok}`;
 }
 
-function extractArrayPayload(raw) {
-  if (Array.isArray(raw)) return raw;
-  if (Array.isArray(raw?.ranking)) return raw.ranking;
-  if (Array.isArray(raw?.data)) return raw.data;
-  if (Array.isArray(raw?.rows)) return raw.rows;
-  if (Array.isArray(raw?.values)) return raw.values;
-  return [];
-}
-
-function sorted(d) {
-  return [...d].sort((a, b) => {
-    if (b.pts !== a.pts) return b.pts - a.pts;
-    return a.팀명.localeCompare(b.팀명, "ko");
-  });
-}
-
-/* ── count-up ── */
+/* ━━ count-up animation ━━ */
 function countUp(id, from, to, el) {
   if (rafs[id]) cancelAnimationFrame(rafs[id]);
-  if (from === to) {
-    el.textContent = to;
-    dispScore[id] = to;
-    return;
-  }
-
-  const t0 = performance.now();
-  const dur = 650;
-
-  function step(now) {
+  if (from === to) { el.textContent = to; return; }
+  const t0 = performance.now(), dur = 600;
+  (function step(now) {
     const p = Math.min(1, (now - t0) / dur);
     const e = 1 - Math.pow(1 - p, 3);
     el.textContent = Math.round(from + (to - from) * e);
-    if (p < 1) {
-      rafs[id] = requestAnimationFrame(step);
-    } else {
-      el.textContent = to;
-      dispScore[id] = to;
-    }
-  }
-
-  rafs[id] = requestAnimationFrame(step);
+    if (p < 1) rafs[id] = requestAnimationFrame(step);
+    else { el.textContent = to; dispScore[id] = to; }
+  })(t0);
 }
 
-/* ── snapshot positions ── */
-function snap(container) {
+/* ━━ FLIP snapshot ━━ */
+function snap() {
   const m = {};
-  container.querySelectorAll('.row[data-id]').forEach(el => {
+  document.querySelectorAll('#board .row[data-id]').forEach(el => {
     m[el.dataset.id] = el.getBoundingClientRect().top;
   });
   return m;
 }
 
-/* ── render ── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RENDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 function render(list) {
-  const container = document.getElementById('board');
-  const oldRows = container.querySelectorAll('.row[data-id]');
-  const max = list.length ? list[0].pts || 1 : 1;
+  const board = document.getElementById('board');
+  const max   = list[0]?.pts || 1;
 
-  const first = snap(container);
+  /* FIRST snapshot */
+  const first = snap();
 
+  /* existing rows map */
   const existing = {};
-  oldRows.forEach(el => {
-    existing[el.dataset.id] = el;
+  board.querySelectorAll('.row[data-id]').forEach(el => { existing[el.dataset.id] = el; });
+
+  /* remove rows for teams no longer in data */
+  Object.keys(existing).forEach(id => {
+    if (!list.find(t => t.id === id)) existing[id].remove();
   });
 
+  /* upsert + re-order */
   list.forEach((team, i) => {
     const rank = i + 1;
-    const id = team.id;
-    const pct = max > 0 ? (team.pts / max) * 100 : 0;
-    let row = existing[id];
+    const id   = team.id;
+    const pct  = Math.max(2, (team.pts / max) * 100); // min 2% so bar is always visible
+    let row    = existing[id];
 
     if (!row) {
+      /* ── NEW row ── */
       row = document.createElement('div');
-      row.className = 'row';
+      row.className  = 'row';
       row.dataset.id = id;
-      row.innerHTML = rowHTML(team, rank, pct);
-      container.appendChild(row);
+      row.innerHTML  = rowHTML(team, rank, pct);
+      board.appendChild(row);
       dispScore[id] = team.pts;
     } else {
+      /* ── UPDATE existing ── */
       const scoreEl = row.querySelector('.score-val');
-      const from = dispScore[id] ?? team.pts;
+      const from    = dispScore[id] ?? team.pts;
       if (from !== team.pts) countUp(id, from, team.pts, scoreEl);
-      else scoreEl.textContent = team.pts;
+      else { dispScore[id] = team.pts; }
 
       row.querySelector('.bar-fill').style.width = pct + '%';
-      row.querySelector('.t-esg').textContent = team.esg;
-      row.querySelector('.t-inn').textContent = team.inn;
-      row.querySelector('.t-imp').textContent = team.imp;
-      row.querySelector('.t-name').textContent = team['팀명'];
-      row.querySelector('.t-title').textContent = team['타이틀'] || '-';
+      row.querySelector('.t-esg').textContent    = team.esg;
+      row.querySelector('.t-inn').textContent    = team.inn;
+      row.querySelector('.t-imp').textContent    = team.imp;
     }
 
+    /* always sync rank num + data-rank (CSS glow selector) */
     row.dataset.rank = rank;
     row.querySelector('.rank-num').textContent = rank;
 
-    const prev = prevRank[id];
+    /* delta arrow */
+    const prev    = prevRank[id];
     const deltaEl = row.querySelector('.rank-delta');
     if (deltaEl) {
       if (prev == null || prev === rank) {
-        deltaEl.className = 'rank-delta eq';
-        deltaEl.textContent = '—';
+        deltaEl.className = 'rank-delta eq'; deltaEl.textContent = '—';
       } else if (rank < prev) {
-        deltaEl.className = 'rank-delta up';
-        deltaEl.textContent = '▲' + (prev - rank);
+        deltaEl.className = 'rank-delta up'; deltaEl.textContent = '▲' + (prev - rank);
         row.classList.remove('flash');
         void row.offsetWidth;
         row.classList.add('flash');
         setTimeout(() => row.classList.remove('flash'), 900);
       } else {
-        deltaEl.className = 'rank-delta dn';
-        deltaEl.textContent = '▼' + (rank - prev);
+        deltaEl.className = 'rank-delta dn'; deltaEl.textContent = '▼' + (rank - prev);
       }
     }
 
-    container.appendChild(row);
+    board.appendChild(row); /* move to correct position */
   });
 
-  Object.keys(existing).forEach(id => {
-    if (!list.some(team => team.id === id)) {
-      existing[id].remove();
-      delete prevRank[id];
-      delete dispScore[id];
-    }
-  });
-
-  const last = snap(container);
+  /* FLIP animate */
+  const last = snap();
   Object.keys(last).forEach(id => {
-    const el = container.querySelector(`.row[data-id="${id}"]`);
+    const el = document.querySelector(`#board .row[data-id="${id}"]`);
     if (!el) return;
     const dy = (first[id] ?? last[id]) - last[id];
     if (Math.abs(dy) < 0.5) return;
     el.style.transition = 'none';
-    el.style.transform = `translateY(${dy}px)`;
+    el.style.transform  = `translateY(${dy}px)`;
     requestAnimationFrame(() => {
       el.style.transition = 'transform 0.6s cubic-bezier(0.22,1,0.36,1)';
-      el.style.transform = '';
+      el.style.transform  = '';
     });
   });
 
+  /* save ranks */
   list.forEach((t, i) => { prevRank[t.id] = i + 1; });
 }
 
 function rowHTML(t, rank, pct) {
+  const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   return `
   <div class="rank-cell">
     <span class="rank-num">${rank}</span>
@@ -503,8 +489,8 @@ function rowHTML(t, rank, pct) {
   </div>
   <div class="mid">
     <div class="name-row">
-      <span class="t-name">${t['팀명']}</span>
-      <span class="t-title">${t['타이틀'] || '-'}</span>
+      <span class="t-name">${esc(t['팀명'])}</span>
+      <span class="t-title">${esc(t['타이틀'])}</span>
     </div>
     <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
     <div class="tags">
@@ -522,59 +508,49 @@ function rowHTML(t, rank, pct) {
 function updateStats(list) {
   const tot = list.reduce((s, t) => s + t.pts, 0);
   document.getElementById('s-teams').textContent = list.length;
-  document.getElementById('s-top').textContent = list[0] ? list[0].pts : 0;
+  document.getElementById('s-top').textContent   = list[0]?.pts ?? '—';
   document.getElementById('s-total').textContent = tot;
-  document.getElementById('s-tick').textContent = ++ticks;
+  document.getElementById('s-tick').textContent  = ++ticks;
 }
 
-async function fetchRanking() {
-  const res = await fetch(API_URL, {
-    method: 'GET',
-    cache: 'no-store'
-  });
-
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}`);
-  }
-
-  const raw = await res.json();
-  console.log('API 응답:', raw);
-
-  return extractArrayPayload(raw)
-    .map(normalizeRow)
-    .filter(row => row['팀명']);
-}
-
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   POLL LOOP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 async function tick() {
-  if (isFetching) return;
-  isFetching = true;
-
-  const notice = document.getElementById('notice');
-
+  if (busy) return;
+  busy = true;
+  setDot('busy');
   try {
-    const fresh = await fetchRanking();
-    data = fresh;
-    const s = sorted(fresh);
+    const fresh = await apiFetch();
 
-    if (!s.length) {
-      notice.textContent = 'NO DATA';
-      return;
+    /* init prevRank for brand-new teams (enter at bottom) */
+    fresh.forEach(t => {
+      if (prevRank[t.id] == null) prevRank[t.id] = 9999;
+    });
+
+    const list = [...fresh].sort(byScore);
+
+    if (list.length === 0) {
+      document.querySelectorAll('#board .row').forEach(r => r.remove());
+      ['s-teams','s-top','s-total'].forEach(id => {
+        document.getElementById(id).textContent = '—';
+      });
+      document.getElementById('s-tick').textContent = ++ticks;
+    } else {
+      render(list);
+      updateStats(list);
     }
-
-    render(s);
-    updateStats(s);
-    notice.textContent = 'LIVE DATA CONNECTED';
-  } catch (error) {
-    console.error(error);
-    notice.textContent = 'API LOAD FAILED';
+    setDot('ok');
+  } catch (e) {
+    console.error('[leaderboard]', e);
+    setDot('err');
   } finally {
-    isFetching = false;
+    busy = false;
   }
 }
 
-// boot
 tick();
-setInterval(tick, 2000);
+setInterval(tick, POLL_MS);
 </script>
 </body>
 </html>
